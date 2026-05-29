@@ -1,6 +1,6 @@
 # E-Commerce Dynamic Pricing Q-Learning Agent
 
-Hey everyone! This is my MCA AI/ML project. I built a dynamic pricing simulator for an online store using Reinforcement Learning (Q-Learning). 
+Hey everyone! I built a dynamic pricing simulator for an online store using Reinforcement Learning (Q-Learning). 
 
 Basically, instead of just setting a fixed price for products, I wanted to see if an AI could learn to adjust prices on the fly to maximize profit. The agent looks at three things:
 - **Inventory left**: How much stock do we have?
