@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time AI Agent for Dynamic Pricing Optimization in E-Commerce Using Q-Learning Algorithms</title>
+    <!-- Google Fonts: Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+
+<body>
+    <div class="glow-bg"></div>
+    <div class="app-container">
+
+        <!-- Header Section -->
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-chart-line-up fa-bounce" style="color: var(--neon-cyan);"></i>
+                </div>
+                <div>
+                    <h1>Real-Time AI Dynamic Pricing Agent Dashboard</h1>
+                    <p class="subtitle">Developed by Lalit Kumar Singh</p>
+                </div>
+            </div>
+            <div class="agent-badge">
+                <span class="status-dot offline" id="agent-status-dot"></span>
+                <span id="agent-status-text">Agent Untrained</span>
+            </div>
+        </header>
+
+        <!-- Main Workspace Layout -->
+        <div class="workspace">
+
+            <!-- Left Sidebar - Environment Controls & Configuration -->
+            <aside class="sidebar card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-sliders"></i> Configuration & Params</h3>
+                </div>
+
+                <form id="config-form" class="config-form">
+                    <div class="section-title">Store & Warehouse Settings</div>
+
+                    <div class="form-group">
+                        <label for="max_inventory">Max Warehouse Stock</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="max_inventory" name="max_inventory" min="5" value="25">
+                            <span class="unit">units</span>
+                        </div>
+                        <span class="help-text">How many units we can hold in our warehouse at once</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="marginal_cost">Product Purchase Cost</label>
+                        <div class="input-wrapper">
+                            <span class="currency">₹</span>
+                            <input type="number" id="marginal_cost" name="marginal_cost" min="1" step="50"
+                                value="1000.00">
+                        </div>
+                        <span class="help-text">The wholesale cost we pay to buy a single unit</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="holding_cost">Daily Storage Fee</label>
+                        <div class="input-wrapper">
+                            <span class="currency">₹</span>
+                            <input type="number" id="holding_cost" name="holding_cost" min="0" step="0.5" value="15.00">
+                        </div>
+                        <span class="help-text">Fee paid per day for each unsold unit kept in storage</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="competitor_base_price">Competitor Benchmark Price</label>
+                        <div class="input-wrapper">
+                            <span class="currency">₹</span>
+                            <input type="number" id="competitor_base_price" name="competitor_base_price" min="10"
+                                step="50" value="1500.00">
+                        </div>
+                        <span class="help-text">Rival store's baseline price for this product</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="competitor_strategy">Competitor Behavior</label>
+                        <select id="competitor_strategy" name="competitor_strategy">
+                            <option value="adaptive" selected>Adaptive (Reacts to market cycles)</option>
+                            <option value="aggressive">Aggressive (Always charges low prices)</option>
+                            <option value="matching">Matching (Matches our price with noise)</option>
+                            <option value="high_margin">High-Margin (Always charges high prices)</option>
+                        </select>
+                        <span class="help-text">Choose how the rival shop updates its prices dynamically</span>
+                    </div>
+
+                    <div class="section-title">AI Brain Tuning</div>
+
+                    <div class="form-group">
+                        <label for="alpha">AI Learning Speed (Alpha)</label>
+                        <div class="range-wrapper">
+                            <input type="range" id="alpha" name="alpha" min="0.01" max="0.5" step="0.01" value="0.15">
+                            <span class="range-val" id="alpha-val">0.15</span>
+                        </div>
+                        <span class="help-text">How fast the AI values new lessons over old ones (0.15 is
+                            optimal)</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gamma">AI Future Focus (Gamma)</label>
+                        <div class="range-wrapper">
+                            <input type="range" id="gamma" name="gamma" min="0.5" max="0.99" step="0.01" value="0.85">
+                            <span class="range-val" id="gamma-val">0.85</span>
+                        </div>
+                        <span class="help-text">How much the AI prioritizes long-term monthly profits over short-term
+                            sales</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="epsilon_decay">AI Curiosity Decay (Epsilon)</label>
+                        <div class="range-wrapper">
+                            <input type="range" id="epsilon_decay" name="epsilon_decay" min="0.95" max="0.999"
+                                step="0.001" value="0.992">
+                            <span class="range-val" id="epsilon_decay-val">0.992</span>
+                        </div>
+                        <span class="help-text">How fast the AI stops testing random prices and starts applying its best
+                            strategy</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="train_episodes">AI Practice Rounds</label>
+                        <select id="train_episodes" name="train_episodes">
+                            <option value="1000">1,000 Trial Months</option>
+                            <option value="3000" selected>3,000 Trial Months</option>
+                            <option value="5000">5,000 Trial Months</option>
+                            <option value="10000">10,000 Trial Months</option>
+                        </select>
+                        <span class="help-text">How many months the AI agent practices in the simulator to perfect its
+                            strategies</span>
+                    </div>
+
+                    <button type="submit" class="btn primary-btn btn-full">
+                        <i class="fa-solid fa-floppy-disk"></i> Apply Parameters
+                    </button>
+                </form>
+            </aside>
+
+            <!-- Right Main Area - Multi-Tab Application -->
+            <main class="main-content">
+
+                <!-- Navigation Tabs -->
+                <nav class="tabs-nav card">
+                    <button class="tab-btn active" data-tab="tab-storefront">
+                        <i class="fa-solid fa-store"></i> Customer Storefront
+                    </button>
+                    <button class="tab-btn" data-tab="tab-train">
+                        <i class="fa-solid fa-graduation-cap"></i> Agent Training
+                    </button>
+                    <button class="tab-btn" data-tab="tab-sandbox">
+                        <i class="fa-solid fa-play"></i> Live Sandbox
+                    </button>
+                    <button class="tab-btn" data-tab="tab-compare">
+                        <i class="fa-solid fa-scale-balanced"></i> Strategy Comparison
+                    </button>
+                    <button class="tab-btn" data-tab="tab-qtable">
+                        <i class="fa-solid fa-table-list"></i> Q-Table Inspection
+                    </button>
+                    <button class="tab-btn" data-tab="tab-add-product">
+                        <i class="fa-solid fa-plus-circle"></i> Add Product
+                    </button>
+                </nav>
+
+                <!-- Tab Content Container -->
+                <div class="tabs-content">
+
+                    <!-- TAB 0: STOREFRONT SIMULATOR -->
+                    <section class="tab-pane active" id="tab-storefront">
+                        <div class="grid-1x2">
+                            <!-- Storefront Product Card -->
+                            <div class="card storefront-product-card">
+                                <div class="product-badge">🔥 BESTSELLER</div>
+                                <div class="product-gallery">
+                                    <div class="phone-mockup">
+                                        <div class="screen">
+                                            <i class="fa-solid fa-headphones fa-4x"
+                                                style="color: var(--neon-cyan); margin-bottom: 20px;"></i>
+                                            <div class="mock-brand">QUANTUM</div>
+                                            <div class="mock-model">Earbuds Pro</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="product-info-details">
+                                    <h2>Quantum Earbuds Pro</h2>
+                                    <p class="product-rating">⭐️ 4.8/5.0 (2,450 Reviews)</p>
+                                    <div class="specs">
+                                        <span><i class="fa-solid fa-bolt"></i> 40h Battery</span>
+                                        <span><i class="fa-solid fa-compress"></i> Active Noise Cancelling</span>
+                                    </div>
+                                    <div class="price-section">
+                                        <div class="price-label">Live Price:</div>
+                                        <div class="price-value" id="storefront-price-display">₹1,500.00</div>
+                                    </div>
+
+                                    <div class="market-benchmark-section"
+                                        style="margin-bottom: 15px; font-size: 13px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05);">
+                                        <div>Competitor Benchmark: <strong id="storefront-competitor-price-display"
+                                                style="color: var(--neon-cyan);">₹1,500.00</strong></div>
+                                        <div id="storefront-price-source"
+                                            style="font-size: 11px; opacity: 0.8; font-style: italic; margin-top: 2px;">
+                                            Source: Product Database</div>
+                                    </div>
+
+                                    <button class="btn primary-btn btn-full" id="storefront-buy-btn">
+                                        <i class="fa-solid fa-cart-shopping"></i> Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Interactive Dashboard Control & Insights -->
+                            <div class="storefront-control-card">
+                                <div class="card explanation-card" style="margin-bottom: 20px;">
+                                    <h3><i class="fa-solid fa-circle-question"></i> Shopper Simulator</h3>
+                                    <p>Select different market conditions below. Our AI Pricing Agent will dynamically
+                                        adjust the store price in real-time, explaining the strategy behind each choice
+                                        in plain English.</p>
+                                </div>
+
+                                <div class="card storefront-controls" style="margin-bottom: 20px;">
+                                    <div class="card-header" style="margin-bottom: 12px; padding-bottom: 8px;">
+                                        <h3><i class="fa-solid fa-sliders"></i> Adjust Store Variables</h3>
+                                    </div>
+                                    <div class="form-group"
+                                        style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;">
+                                        <label for="store-product-select"><i class="fa-solid fa-tags"
+                                                style="color: var(--neon-cyan);"></i> Select Store Product</label>
+                                        <select id="store-product-select">
+                                            <!-- Dynamically populated from products.json database -->
+                                        </select>
+                                    </div>
+                                    <div class="form-group"
+                                        style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;">
+                                        <label for="store-inv-select">Inventory Left (Stock Level)</label>
+                                        <select id="store-inv-select">
+                                            <option value="4" selected>Full Stock (Overstocked)</option>
+                                            <option value="2">Medium Stock (50% remaining)</option>
+                                            <option value="1">Low Stock (Scarcity alert!)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group"
+                                        style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;">
+                                        <label for="store-traffic-select">Market Traffic (Customer Demand)</label>
+                                        <select id="store-traffic-select">
+                                            <option value="0">Low Traffic (Slow day)</option>
+                                            <option value="1" selected>Medium Traffic (Normal day)</option>
+                                            <option value="2">High Traffic (Flash sale / Holiday peak)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group"
+                                        style="margin-bottom: 16px; display: flex; flex-direction: column; gap: 4px;">
+                                        <label for="store-comp-select">Competitor Price</label>
+                                        <select id="store-comp-select">
+                                            <option value="0">Competitor is LOWER (Undercutting us)</option>
+                                            <option value="1" selected>Competitors Comparable (Normal market)</option>
+                                            <option value="2">Competitor is HIGHER (Premium competitor)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="card ai-insights-card" style="border-left: 4px solid var(--neon-cyan);">
+                                    <div class="card-header" style="margin-bottom: 12px; padding-bottom: 8px;">
+                                        <h3><i class="fa-solid fa-brain"></i> AI Pricing Insights</h3>
+                                    </div>
+                                    <div id="ai-insight-text" class="insight-text-box">
+                                        Loading AI insight...
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- TAB 1: TRAINING CONSOLE -->
+                    <section class="tab-pane" id="tab-train">
+                        <div class="grid-2x1">
+                            <div class="card train-control-card">
+                                <h2>Autonomous Policy Training</h2>
+                                <p>Initialize the pricing environment and train the tabular Q-learning algorithm. The
+                                    agent learns price elasticity and competitor strategies over consecutive simulation
+                                    runs by updating its Q-values.</p>
+
+                                <div class="training-console">
+                                    <div class="status-display">
+                                        <div class="metric">
+                                            <span class="metric-label">Policy Coverage</span>
+                                            <span class="metric-value" id="fill-rate-display">0.0%</span>
+                                        </div>
+                                        <div class="metric">
+                                            <span class="metric-label">Execution Time</span>
+                                            <span class="metric-value" id="train-time-display">--</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="progress-bar-container hidden" id="progress-container">
+                                        <div class="progress-info">
+                                            <span>Training agent model...</span>
+                                            <span id="progress-percent">0%</span>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" id="progress-fill" style="width: 0%;"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="console-actions">
+                                        <button class="btn accent-btn" id="start-training-btn">
+                                            <i class="fa-solid fa-bolt"></i> Run RL Training
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="math-panel">
+                                    <h4>Q-Learning Update Formula:</h4>
+                                    <div class="formula">
+                                        Q(s, a) &larr; Q(s, a) + &alpha; [ r + &gamma; max<sub>a'</sub> Q(s', a') - Q(s,
+                                        a) ]
+                                    </div>
+                                    <p class="description">Where state <strong>s = (inventory, demand, relative
+                                            price)</strong> and actions <strong>a = discrete pricing tiers</strong>.</p>
+                                </div>
+                            </div>
+
+                            <div class="card chart-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-chart-line"></i> Cumulative Rewards & Exploration
+                                        Convergence</h3>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="trainingChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- TAB 2: LIVE SANDBOX SIMULATOR -->
+                    <section class="tab-pane" id="tab-sandbox">
+                        <div class="sandbox-controls card">
+                            <div class="control-row">
+                                <div class="sim-speed">
+                                    <label>Simulation Mode:</label>
+                                    <select id="sim-strategy">
+                                        <option value="q_learning">Trained Q-Learning Agent</option>
+                                        <option value="rule_based">Rule-Based Pricing (Heuristic)</option>
+                                        <option value="static">Static Pricing (1.5x Margin)</option>
+                                    </select>
+                                </div>
+                                <div class="sim-actions">
+                                    <button class="btn secondary-btn" id="reset-sim-btn">
+                                        <i class="fa-solid fa-rotate-left"></i> Reset Sim
+                                    </button>
+                                    <button class="btn primary-btn" id="play-sim-btn">
+                                        <i class="fa-solid fa-play"></i> Play Episode
+                                    </button>
+                                    <button class="btn accent-btn" id="step-sim-btn">
+                                        <i class="fa-solid fa-forward-step"></i> Single Step
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sandbox Status Dashboard -->
+                        <div class="stats-row">
+                            <div class="metric-card card">
+                                <div class="icon-holder blue"><i class="fa-solid fa-calendar-day"></i></div>
+                                <div class="metric-data">
+                                    <h4 id="sim-day-display">Day 0 / 30</h4>
+                                    <p>Current Time</p>
+                                </div>
+                            </div>
+
+                            <div class="metric-card card">
+                                <div class="icon-holder green"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                                <div class="metric-data">
+                                    <h4 id="sim-profit-display">₹0.00</h4>
+                                    <p>Cumulative Profit</p>
+                                </div>
+                            </div>
+
+                            <div class="metric-card card">
+                                <div class="icon-holder purple"><i class="fa-solid fa-cubes"></i></div>
+                                <div class="metric-data">
+                                    <h4 id="sim-inventory-display">0 / 0</h4>
+                                    <p>Inventory Level</p>
+                                </div>
+                            </div>
+
+                            <div class="metric-card card">
+                                <div class="icon-holder orange"><i class="fa-solid fa-fire"></i></div>
+                                <div class="metric-data">
+                                    <h4 id="sim-demand-display">--</h4>
+                                    <p>Market Demand</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid-2x1">
+                            <!-- Visual sandbox timeline -->
+                            <div class="card chart-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-chart-area"></i> Live Pricing & Inventory Timeline</h3>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="sandboxChart"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Feed of steps -->
+                            <div class="card log-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-receipt"></i> Daily Sales Transaction Log</h3>
+                                </div>
+                                <div class="log-container" id="sim-log">
+                                    <div class="log-placeholder">Simulation ready. Click "Play Episode" or "Single Step"
+                                        to run daily updates.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- TAB 3: STRATEGY COMPARISON -->
+                    <section class="tab-pane" id="tab-compare">
+                        <div class="card explanation-card">
+                            <div class="compare-heading">
+                                <h2>Comparative Performance Evaluation</h2>
+                                <button class="btn accent-btn" id="run-compare-btn">
+                                    <i class="fa-solid fa-sync"></i> Run Benchmark Analysis
+                                </button>
+                            </div>
+                            <p>Evaluates the policies side-by-side. The dashboard runs <strong>50 randomized simulation
+                                    runs</strong> of 30 days each, incorporating variable seasonality, stochastic
+                                customer traffic, and competitive pricing adjustments. The averages are compiled below.
+                            </p>
+                        </div>
+
+                        <div class="comparison-charts-grid">
+                            <div class="card chart-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-wallet"></i> Average Net Profit & Revenue (₹)</h3>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="compareProfitChart"></canvas>
+                                </div>
+                            </div>
+
+                            <div class="card chart-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-chart-column"></i> Average Unsold Stock vs Stockout Events
+                                    </h3>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="compareStockChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card table-card">
+                            <div class="card-header">
+                                <h3><i class="fa-solid fa-table"></i> Aggregate Benchmark Statistics</h3>
+                            </div>
+                            <table class="premium-table" id="comparison-table">
+                                <thead>
+                                    <tr>
+                                        <th>Strategy</th>
+                                        <th>Average Revenue</th>
+                                        <th>Average Net Profit</th>
+                                        <th>Average Holding Costs</th>
+                                        <th>Average Units Sold</th>
+                                        <th>Average Unsold Inventory</th>
+                                        <th>Avg Stockout Attempts</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr id="row-q_learning">
+                                        <td class="strategy-name"><span class="badge q-badge">Q-Learning Agent</span>
+                                        </td>
+                                        <td class="rev">-</td>
+                                        <td class="prof highlight-text">-</td>
+                                        <td class="hold">-</td>
+                                        <td class="sold">-</td>
+                                        <td class="unsold">-</td>
+                                        <td class="stockout">-</td>
+                                    </tr>
+                                    <tr id="row-rule_based">
+                                        <td class="strategy-name"><span class="badge rule-badge">Rule-Based
+                                                Pricing</span></td>
+                                        <td class="rev">-</td>
+                                        <td class="prof">-</td>
+                                        <td class="hold">-</td>
+                                        <td class="sold">-</td>
+                                        <td class="unsold">-</td>
+                                        <td class="stockout">-</td>
+                                    </tr>
+                                    <tr id="row-static">
+                                        <td class="strategy-name"><span class="badge static-badge">Static Margin
+                                                (1.5x)</span></td>
+                                        <td class="rev">-</td>
+                                        <td class="prof">-</td>
+                                        <td class="hold">-</td>
+                                        <td class="sold">-</td>
+                                        <td class="unsold">-</td>
+                                        <td class="stockout">-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- TAB 4: Q-TABLE INSPECTION -->
+                    <section class="tab-pane" id="tab-qtable">
+                        <div class="grid-1x2">
+                            <div class="card config-card">
+                                <h2>Q-Table State Selector</h2>
+                                <p>Inspect policy decisions. By choosing a discretized state of inventory level, current
+                                    market demand, and relative competitor pricing, you can see the expected cumulative
+                                    rewards (Q-values) for each available price multiplier action.</p>
+
+                                <div class="state-selectors form-group-grid">
+                                    <div class="form-group">
+                                        <label for="q-inv-select">Inventory Level State</label>
+                                        <select id="q-inv-select">
+                                            <option value="4" selected>High (76% - 100%)</option>
+                                            <option value="3">Medium-High (51% - 75%)</option>
+                                            <option value="2">Medium-Low (26% - 50%)</option>
+                                            <option value="1">Low (1% - 25%)</option>
+                                            <option value="0">Out of Stock (0%)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="q-dem-select">Current Demand State</label>
+                                        <select id="q-dem-select">
+                                            <option value="2" selected>High Customer Traffic</option>
+                                            <option value="1">Medium Customer Traffic</option>
+                                            <option value="0">Low Customer Traffic</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="q-comp-select">Competitor Price Relation</label>
+                                        <select id="q-comp-select">
+                                            <option value="2">Competitor is HIGHER</option>
+                                            <option value="1" selected>Competitors Comparable</option>
+                                            <option value="0">Competitor is LOWER</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="policy-decision-card">
+                                    <h4>Agent Decision Rule for Selected State:</h4>
+                                    <div id="policy-recommendation" class="recommendation-box">
+                                        Run training to populate policy values.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card chart-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-chart-bar"></i> Expected Cumulative Rewards (Q-Values)
+                                    </h3>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="qValuesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- TAB 5: ADD PRODUCT -->
+                    <section class="tab-pane" id="tab-add-product">
+                        <div class="card explanation-card" style="margin-bottom: 20px;">
+                            <h2>Add Custom Product to Store</h2>
+                            <p>Register a new product in the store database. Once added, you can select it from the
+                                dropdown on the <strong>Customer Storefront</strong> tab to simulate its dynamic
+                                pricing.</p>
+                        </div>
+
+                        <div class="card" style="max-width: 600px; margin: 0 auto;">
+                            <form id="add-product-form" class="config-form">
+                                <div class="form-group"
+                                    style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px;">
+                                    <label for="new-prod-name">Product Name</label>
+                                    <div class="input-wrapper">
+                                        <input type="text" id="new-prod-name" placeholder="e.g. Apex Wireless Mouse"
+                                            required>
+                                    </div>
+                                </div>
+
+                                <div class="grid-1x2" style="gap: 16px; margin-bottom: 12px;">
+                                    <div class="form-group" style="display: flex; flex-direction: column; gap: 4px;">
+                                        <label for="new-prod-cost">Wholesale Cost (₹)</label>
+                                        <div class="input-wrapper">
+                                            <span class="currency">₹</span>
+                                            <input type="number" id="new-prod-cost" min="10" value="1500" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="display: flex; flex-direction: column; gap: 4px;">
+                                        <label for="new-prod-holding">Daily Storage Fee (₹)</label>
+                                        <div class="input-wrapper">
+                                            <span class="currency">₹</span>
+                                            <input type="number" id="new-prod-holding" min="0" value="10" required>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="grid-1x2" style="gap: 16px; margin-bottom: 12px;">
+                                    <div class="form-group" style="display: flex; flex-direction: column; gap: 4px;">
+                                        <label for="new-prod-stock">Initial Stock Level</label>
+                                        <div class="input-wrapper">
+                                            <input type="number" id="new-prod-stock" min="5" value="30" required>
+                                            <span class="unit">units</span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="display: flex; flex-direction: column; gap: 4px;">
+                                        <label for="new-prod-icon">Product Icon</label>
+                                        <select id="new-prod-icon">
+                                            <option value="fa-mobile-screen-button">📱 Smartphone</option>
+                                            <option value="fa-laptop">💻 Laptop</option>
+                                            <option value="fa-headphones">🎧 Headphones</option>
+                                            <option value="fa-plug">🔌 Accessory</option>
+                                            <option value="fa-camera">📷 Camera</option>
+                                            <option value="fa-gamepad">🎮 Gaming Device</option>
+                                            <option value="fa-stopwatch">⌚ Wearable</option>
+                                            <option value="fa-tv">📺 Smart TV</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group"
+                                    style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px;">
+                                    <label for="new-prod-competitor-price">Competitor Benchmark Price (₹)</label>
+                                    <div class="input-wrapper">
+                                        <span class="currency">₹</span>
+                                        <input type="number" id="new-prod-competitor-price" min="10"
+                                            placeholder="e.g. 2000" required>
+                                    </div>
+                                    <span class="help-text">Rival store's baseline price to compete against</span>
+                                </div>
+
+                                <div class="form-group"
+                                    style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px;">
+                                    <label for="new-prod-spec1">Product Feature Tag 1</label>
+                                    <div class="input-wrapper">
+                                        <input type="text" id="new-prod-spec1" placeholder="e.g. 50-Hour Battery Life"
+                                            value="Fast Wireless Charging">
+                                    </div>
+                                </div>
+
+                                <div class="form-group"
+                                    style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px;">
+                                    <label for="new-prod-spec2">Product Feature Tag 2</label>
+                                    <div class="input-wrapper">
+                                        <input type="text" id="new-prod-spec2" placeholder="e.g. Ultra Lightweight"
+                                            value="Water Resistant">
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn accent-btn btn-full">
+                                    <i class="fa-solid fa-plus"></i> Add Product to Catalog
+                                </button>
+                            </form>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>&copy; 2026 Real-Time AI Agent for Dynamic Pricing Optimization in E-Commerce Using Q-Learning
+                Algorithms.</p>
+        </footer>
+    </div>
+
+
+
+    <!-- Custom JavaScript Logic -->
+    <script src="/static/js/app.js"></script>
+</body>
+
+</html>
